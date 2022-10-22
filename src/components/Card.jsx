@@ -2,8 +2,8 @@ import React from 'react';
 
 function Card({card, onCardClick}) {
     return (
-        <article className="element">
-            <img className="element__image" src={card.link} alt={card.name} onClick={onCardClick} />
+        <article className="element" onClick={onCardClick}>
+            <img className="element__image" src={card.link} alt={card.name} />
             <div className="element__trash"></div>
             <div className="element__base">
                 <h2 className="element__title">{card.name}</h2>

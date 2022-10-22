@@ -170,7 +170,7 @@ function Main({props, openState, card}) {
         </button>
       </PopupWithForm>
 
-      <ImagePopup card={card}/>
+      <ImagePopup isOpen={openState.isImagePopupOpen} onClose={props.onClose} card={card}/>
     </>
   )
 }

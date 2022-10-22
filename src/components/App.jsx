@@ -26,10 +26,11 @@ function App() {
       setAddPlaceOpen(false)
       setEditProfileOpen(false)
       setEditAvatarOpen(false)
+      setImagePopupOpen(false)
     },
     onImageClick: function handleCardClick(e) {
-      // setImagePopupOpen(true)   Закончил на этом месте. Нужно доделать открытие попапа с изображением!!!!!!!
-      setSelectedCard(e.target.src)
+      setSelectedCard(e.target)
+      setImagePopupOpen(true)
     }
   }
 
@@ -37,7 +38,7 @@ function App() {
     <div className="body">          
       <div className="content"> 
         <Header />
-        <Main props={props} openState={{isAddPlacePopupOpen, isEditAvatarPopupOpen, isEditProfilePopupOpen}} card={selectedCard} />
+        <Main props={props} openState={{isAddPlacePopupOpen, isEditAvatarPopupOpen, isEditProfilePopupOpen, isImagePopupOpen}} card={selectedCard} />
         <Footer /> 
       </div>
     </div>
