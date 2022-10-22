@@ -1,46 +1,45 @@
 import '../index.css';
-import React from 'react';
+import React, {useState} from 'react';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
 
 function App() {
-  const [isEditProfilePopupOpen, setEditProfileOpen] = React.useState(false)
-  const [isAddPlacePopupOpen, setAddPlaceOpen] = React.useState(false)
-  const [isEditAvatarPopupOpen, setEditAvatarOpen] = React.useState(false)
-  const [isImagePopupOpen, setImagePopupOpen] = React.useState(false)
-  const [isRemoveCardPopupOpen, setRemoveCardOpen] = React.useState(false)
-  const [selectedCard, setSelectedCard] = React.useState('')
+  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false)
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false)
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false)
+  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false)
+  const [isRemoveCardPopupOpen, setIsRemoveCardPopupOpen] = useState(false)
+  const [selectedCard, setSelectedCard] = useState({})
 
   const props = {
     onEditProfile: function handleEditProfileClick() {
-      setEditProfileOpen(!isEditProfilePopupOpen)
+      setIsEditProfilePopupOpen(!isEditProfilePopupOpen)
     },
     onAddPlace: function handleAddPlaceClick() {
-      setAddPlaceOpen(!isAddPlacePopupOpen)
+      setIsAddPlacePopupOpen(!isAddPlacePopupOpen)
     },
     onEditAvatar: function handleEditAvatarClick() {
-      setEditAvatarOpen(!isEditAvatarPopupOpen) 
+      setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen) 
     },
     onClose: function closeAllPopups() {
-      setAddPlaceOpen(false)
-      setEditProfileOpen(false)
-      setEditAvatarOpen(false)
-      setImagePopupOpen(false)
+      setIsAddPlacePopupOpen(false)
+      setIsEditProfilePopupOpen(false)
+      setIsEditAvatarPopupOpen(false)
+      setIsImagePopupOpen(false)
+      setSelectedCard({})
     },
     onImageClick: function handleCardClick(e) {
       setSelectedCard(e.target)
-      setImagePopupOpen(true)
+      setIsImagePopupOpen(true)
     }
   }
 
-  return (
-    <div className="body">          
-      <div className="content"> 
-        <Header />
-        <Main props={props} openState={{isAddPlacePopupOpen, isEditAvatarPopupOpen, isEditProfilePopupOpen, isImagePopupOpen}} card={selectedCard} />
-        <Footer /> 
-      </div>
+  return (   
+    <div className="content"> 
+      <Header />
+      <Main props={props} openState={{isAddPlacePopupOpen, isEditAvatarPopupOpen, isEditProfilePopupOpen, isImagePopupOpen}} card={selectedCard} />
+      <Footer /> 
     </div>
   );
 }

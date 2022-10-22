@@ -14,6 +14,14 @@ function PopupWithForm(props) {
             <h2 className="popup__title">{props.title}</h2>
             <form className="popup__inputs" id={props.name} name={props.name} noValidate>
                 {props.children}
+                <button 
+                    type="submit" 
+                    className="popup__save-btn" 
+                    id="popup_type_profile-save-btn"
+                    aria-label="Кнопка отправки формы на сервер"
+                >
+                  {props.buttonText}           
+                </button>
             </form>
           </div>
         </div>

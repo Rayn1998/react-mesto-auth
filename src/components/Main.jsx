@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom/client';
 import avatar from '../images/avatar.jpg';
 import PopupWithForm from './PopupWithForm';
@@ -7,10 +7,10 @@ import Card from './Card';
 import ImagePopup from './ImagePopup';
 
 function Main({props, openState, card}) {
-  const [userName, setUserName] = React.useState('Jack Coustou')
-  const [userDescription, setUserDescription] = React.useState('Sailor, adventurer')
-  const [userAvatar, setUserAvatar] = React.useState(avatar)
-  const [cards, setCards] = React.useState([])
+  const [userName, setUserName] = useState('Jack Coustou')
+  const [userDescription, setUserDescription] = useState('Sailor, adventurer')
+  const [userAvatar, setUserAvatar] = useState(avatar)
+  const [cards, setCards] = useState([])
 
   function setUserFeatures(data) {
     setUserName(data.name)
@@ -26,10 +26,10 @@ function Main({props, openState, card}) {
     return Promise.all([api.getUserData(), api.getCardsData()]).then(res => res).catch(err => console.log(err))
   }
 
-  React.useEffect(() => {
-    getData().then(res => {
-      setUserFeatures(res[0])
-      res[1].forEach(item => {
+  useEffect(() => {
+    getData().then(([userData, cardsData]) => {
+      setUserFeatures(userData)
+      cardsData.forEach(item => {
         setNewCard(item)
       })
     })
@@ -65,7 +65,7 @@ function Main({props, openState, card}) {
         </section>
       </main>
 
-      <PopupWithForm isOpen={openState.isEditProfilePopupOpen} onClose={props.onClose} name='edit-profile-form' title='Редактировать профиль'>
+      <PopupWithForm isOpen={openState.isEditProfilePopupOpen} onClose={props.onClose} name='edit-profile-form' title='Редактировать профиль' buttonText='Сохранить'>
         <div className="popup__divide-container">
           <input 
             name="name" 
@@ -91,17 +91,9 @@ function Main({props, openState, card}) {
           />
           <span className="popup__error popup__profession-error"></span>
         </div>
-        <button 
-          type="submit" 
-          className="popup__save-btn" 
-          id="popup_type_profile-save-btn"
-          aria-label="Кнопка отправки формы на сервер"
-        >
-          Сохранить            
-        </button>
       </PopupWithForm>
 
-      <PopupWithForm isOpen={openState.isAddPlacePopupOpen} onClose={props.onClose} name='add-place-form' title='Новое место' >
+      <PopupWithForm isOpen={openState.isAddPlacePopupOpen} onClose={props.onClose} name='add-place-form' title='Новое место' buttonText='Сохранить'>
         <div className="popup__divide-container">
           <input 
             name="name" 
@@ -126,15 +118,6 @@ function Main({props, openState, card}) {
           />
           <span className="popup__error popup__link-error"></span>
         </div>
-        <button 
-          type="submit" 
-          className="popup__save-btn popup__btn-disabled" 
-          id="popup_type_cadr-add-save-btn" 
-          disabled
-          aria-label="Кнопка создания новой карточки"
-        >
-          Создать
-        </button>
       </PopupWithForm>
 
       <PopupWithForm name='card-remove-form' title='Вы уверены?' >
@@ -148,7 +131,7 @@ function Main({props, openState, card}) {
         </button>
       </PopupWithForm>
 
-      <PopupWithForm isOpen={openState.isEditAvatarPopupOpen} onClose={props.onClose} name='avatar-edit-form' title='Обновить аватар' >
+      <PopupWithForm isOpen={openState.isEditAvatarPopupOpen} onClose={props.onClose} name='avatar-edit-form' title='Обновить аватар' buttonText='Сохранить'>
         <div className="popup__divide-container">
           <input 
             name="avatar" 
@@ -160,14 +143,6 @@ function Main({props, openState, card}) {
           />
           <span className="popup__error popup__link-avatar-error"></span>
         </div>
-        <button 
-          type="submit" 
-          className="popup__save-btn" 
-          id="popup_type_profile-image-save-btn"
-          aria-label="Кнопка удаления карточки"
-        >
-          Сохранить
-        </button>
       </PopupWithForm>
 
       <ImagePopup isOpen={openState.isImagePopupOpen} onClose={props.onClose} card={card}/>
