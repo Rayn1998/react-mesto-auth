@@ -1,34 +1,30 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import ReactDOM from 'react-dom/client';
 import avatar from '../images/avatar.jpg';
 import PopupWithForm from './PopupWithForm';
 import api from '../utils/Api';
 import Card from './Card';
 import ImagePopup from './ImagePopup';
+import { CurrentUserContext } from '../contexts/CurrentUserContext';
 
 function Main({props, openState, card}) {
-  const [userName, setUserName] = useState('Jack Coustou')
-  const [userDescription, setUserDescription] = useState('Sailor, adventurer')
-  const [userAvatar, setUserAvatar] = useState(avatar)
-  const [cards, setCards] = useState([])
+  const currentUser = useContext(CurrentUserContext)
 
-  function setUserFeatures(data) {
-    setUserName(data.name)
-    setUserDescription(data.about)
-    setUserAvatar(data.avatar)
-  }
+  const [userName, setUserName] = useState(`${currentUser.name}`)
+  const [userDescription, setUserDescription] = useState(`${currentUser.about}`)
+  const [userAvatar, setUserAvatar] = useState(`${currentUser.avatar}`)
+  const [cards, setCards] = useState([])
 
   function setNewCard(card) {
     setCards(cards => [...cards, card])
   }
 
   function getData() {
-    return Promise.all([api.getUserData(), api.getCardsData()]).then(res => res).catch(err => console.log(err))
+    return api.getCardsData().then(res => res).catch(err => console.log(err))
   }
 
   useEffect(() => {
-    getData().then(([userData, cardsData]) => {
-      setUserFeatures(userData)
+    getData().then(cardsData => {
       cardsData.forEach(item => {
         setNewCard(item)
       })
