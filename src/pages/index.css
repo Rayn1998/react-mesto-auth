@@ -37,6 +37,7 @@
 @import url('../blocks/element/__like_active/element__like_active.css');
 @import url('../blocks/element/__title/element__title.css');
 @import url('../blocks/element/__trash/element__trash.css');
+@import url('../blocks/element/__trash/_hidden/element__trash_hidden.css');
 
 /* FOOTER */
 @import url('../blocks/footer/footer.css');
