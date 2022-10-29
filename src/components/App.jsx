@@ -15,10 +15,28 @@ function App() {
   const [isRemoveCardPopupOpen, setIsRemoveCardPopupOpen] = useState(false)
   const [selectedCard, setSelectedCard] = useState({})
   const [currentUser, setCurrentUser] = useState({})
+  const [cards, setCards] = useState([])
 
-  useEffect(() => {
-    api.getUserData().then(userData => setCurrentUser({ ...currentUser, ...userData })).catch(err => console.log(err))
-  }, [])
+  const cardsProps = {
+    onGetCardsData: function getCardsData() {
+      return api.getCardsData().then(res => res).catch(err => console.log(err))
+    },
+    onCardLike:function handleCardLike(card) {
+      const isLiked = card.likes.some(i => i._id === currentUser._id)
+      isLiked 
+      ? api.deleteLike(card).then(card => setCards(state => state.map(c => c._id === card._id ? card : c)))
+      : api.like(card._id).then(card => setCards(state => state.map(c => c._id === card._id ? card : c)))
+    },
+    onCardDelete: function handleCardDelete(cardId) {
+      api.deleteCard(cardId).then(setCards(cards => cards.filter(card => card._id !== cardId)))
+    },
+    onSetNewCard: function setNewCard(card) {
+      setCards(cards => [...cards, card])
+    },
+    onAddCard: function handleAddCard(newData) {
+      api.newCard(newData).then(card => setCards([card, ...cards])).catch(err => console.log(err))
+    }
+  }
 
   const props = {
     onEditProfile: function handleEditProfileClick() {
@@ -48,14 +66,24 @@ function App() {
     },
     onSubmitAvatar: function handleUpdateAvatar(newData) {
       api.editAvatar(newData).then(data => setCurrentUser({...currentUser, ...data})).catch(err => console.log(err))
-    }
+    },
   }
+
+  useEffect(() => {
+    api.getUserData().then(userData => setCurrentUser({ ...currentUser, ...userData })).catch(err => console.log(err))
+  }, [])
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="content">
         <Header />
-        <Main props={props} openState={{ isAddPlacePopupOpen, isEditAvatarPopupOpen, isEditProfilePopupOpen, isImagePopupOpen }} card={selectedCard} />
+        <Main 
+          props={props} 
+          openState={{ isAddPlacePopupOpen, isEditAvatarPopupOpen, isEditProfilePopupOpen, isImagePopupOpen }} 
+          card={selectedCard} 
+          cardsProps={cardsProps}
+          cards={cards}
+        />
         <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onUpdateAvatar={props.onSubmitAvatar} onClose={props.onClose} /> 
         <Footer />
       </div>

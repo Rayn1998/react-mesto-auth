@@ -5,36 +5,19 @@ import api from '../utils/Api';
 import Card from './Card';
 import ImagePopup from './ImagePopup';
 import EditProfilePopup from './EditProfilePopup';
+import AddPlacePopup from './AddPlacePopup';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
+import EditAvatarPopup from './EditAvatarPopup';
 
-function Main({props, openState, card}) {
+function Main({props, openState, card, cards, cardsProps}) {
   const currentUser = useContext(CurrentUserContext)
 
-  const [cards, setCards] = useState([])
-
-  function handleCardLike(card) {
-    const isLiked = card.likes.some(i => i._id === currentUser._id)
-    isLiked 
-    ? api.deleteLike(card).then(card => setCards(state => state.map(c => c._id === card._id ? card : c)))
-    : api.like(card._id).then(card => setCards(state => state.map(c => c._id === card._id ? card : c)))
-  }
-
-  function handleCardDelete(cardId) {
-    api.deleteCard(cardId).then(setCards(cards => cards.filter(card => card._id !== cardId)))
-  }
-
-  function setNewCard(card) {
-    setCards(cards => [...cards, card])
-  }
-
-  function getData() {
-    return api.getCardsData().then(res => res).catch(err => console.log(err))
-  }
+  const {onGetCardsData, onCardLike, onCardDelete, onSetNewCard, onAddCard} = cardsProps
 
   useEffect(() => {
-    getData().then(cardsData => {
+    onGetCardsData().then(cardsData => {
       cardsData.forEach(item => {
-        setNewCard(item)
+        onSetNewCard(item)
       })
     })
   }, [])
@@ -62,7 +45,7 @@ function Main({props, openState, card}) {
         <section className="elements">
           {cards.map((card, i) => {
               return (
-                <Card card={card} key={i} onCardLike={handleCardLike} onImageClick={props.onImageClick} onCardDelete={handleCardDelete} />
+                <Card card={card} key={i} onCardLike={onCardLike} onImageClick={props.onImageClick} onCardDelete={onCardDelete} />
               )
             })
           }
@@ -70,34 +53,8 @@ function Main({props, openState, card}) {
       </main>
 
       <EditProfilePopup onUpdateUser={props.onSubmit} isOpen={openState.isEditProfilePopupOpen} onClose={props.onClose} />
+      <AddPlacePopup isOpen={openState.isAddPlacePopupOpen} onSubmit={onAddCard} onClose={props.onClose} />
       <ImagePopup isOpen={openState.isImagePopupOpen} onClose={props.onClose} card={card}/>
-
-      <PopupWithForm isOpen={openState.isAddPlacePopupOpen} onClose={props.onClose} name='add-place-form' title='Новое место' buttonText='Сохранить'>
-        <div className="popup__divide-container">
-          <input 
-            name="name" 
-            className="popup__input popup__input_type_title" 
-            type="text" 
-            placeholder="Название"
-            id="popup__title" 
-            required 
-            minLength="2" 
-            maxLength="30" 
-          />
-          <span className="popup__error popup__title-error"></span>
-        </div>
-        <div className="popup__divide-container">
-          <input 
-            name="link" 
-            className="popup__input popup__input_type_link" 
-            type="url"
-            placeholder="Ссылка на картинку" 
-            id="popup__link" 
-            required 
-          />
-          <span className="popup__error popup__link-error"></span>
-        </div>
-      </PopupWithForm>
 
       <PopupWithForm name='card-remove-form' title='Вы уверены?' >
         <button 
