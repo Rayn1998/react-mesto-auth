@@ -7,16 +7,31 @@ class Api {
     
     _getResponseData(res) {
         if (!res.ok) {
-            return Promise.reject(`Ошибка: ${res.status}`); 
+          return Promise.reject(`Ошибка: ${res.status}`); 
+        } else {
+          return res.json()
         }
-        return res.json();
     }
 
     _request(url, options) {
       return fetch(url, options).then(this._getResponseData)
     }
 
-    // USE
+    like(cardId) {
+      return this._request(`${this._address}/${this._cohort}/cards/${cardId}/likes`, {
+        method: 'PUT',
+        headers: this._headers,
+      })
+    }
+
+    deleteLike(cardData) {
+      return this._request(`${this._address}/${this._cohort}/cards/${cardData._id}/likes`, {
+        method: 'DELETE',
+        headers: this._headers,
+      })
+    }
+
+    // USER
     getUserData() {
         return this._request(`${this._address}/${this._cohort}/users/me`, {
           method: 'GET',
@@ -32,7 +47,7 @@ class Api {
     }
 
     sendData(newData) {
-      this._request(`${this._address}/${this._cohort}/users/me`, {
+      return this._request(`${this._address}/${this._cohort}/users/me`, {
         method: 'PATCH',
         headers: this._headers,
         body: JSON.stringify({
@@ -43,7 +58,7 @@ class Api {
     }
 
     editAvatar(link) {
-      this._request(`${this._address}/${this._cohort}/users/me/avatar`, {
+      return this._request(`${this._address}/${this._cohort}/users/me/avatar`, {
         method: 'PATCH',
         headers: this._headers,
         body: JSON.stringify({
@@ -53,7 +68,7 @@ class Api {
     }
 
     newCard(cardData) {
-      this._request(`${this._address}/${this._cohort}/cards`, {
+      return this._request(`${this._address}/${this._cohort}/cards`, {
         method: 'POST',
         headers: this._headers,
         body: JSON.stringify({
@@ -64,23 +79,9 @@ class Api {
     }
 
     deleteCard(cardId) {
-      this._request(`${this._address}/${this._cohort}/cards/${cardId}`, {
+      return this._request(`${this._address}/${this._cohort}/cards/${cardId}`, {
         method: 'DELETE',
         headers: this._headers
-      })
-    }
-
-    like(cardId) {
-      this._request(`${this._address}/${this._cohort}/cards/${cardId}/likes`, {
-        method: 'PUT',
-        headers: this._headers,
-      })
-    }
-
-    deleteLike(cardData) {
-      this._request(`${this._address}/${this._cohort}/cards/${cardData._id}/likes`, {
-        method: 'DELETE',
-        headers: this._headers,
       })
     }
 }

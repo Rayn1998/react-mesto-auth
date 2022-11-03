@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import PopupWithForm from './PopupWithForm';
 
-function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
+function EditProfilePopup({ isOpen, onClose, onUpdateUser, isLoading }) {
   const currentUser = useContext(CurrentUserContext)
 
   const [name, setName] = useState('')
@@ -27,16 +27,22 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
       name,
       about: description,
     })
-    handleClose()
   }
 
   useEffect(() => {
     setName(currentUser.name)
     setDescription(currentUser.about)
-  }, [currentUser])
+  }, [currentUser, isOpen])
 
   return (
-    <PopupWithForm isOpen={isOpen} onClose={handleClose} onSubmit={handleSubmit} name='edit-profile-form' title='Редактировать профиль' buttonText='Сохранить'>
+    <PopupWithForm 
+      isOpen={isOpen}
+      onClose={handleClose} 
+      onSubmit={handleSubmit} 
+      name='edit-profile-form' 
+      title='Редактировать профиль' 
+      buttonText={isLoading ? 'Сохранение...' : 'Сохранить'}
+    >
       <div className="popup__divide-container">
         <input
           name="name"
@@ -46,7 +52,7 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
           required
           minLength="2"
           maxLength="40"
-          value={name}
+          value={name || ''}
           onChange={handleName}
         />
         <span className="popup__error popup__name-error"></span>
@@ -61,7 +67,7 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
           required
           minLength="2"
           maxLength="200"
-          value={description}
+          value={description || ''}
           onChange={handleDescription}
         />
         <span className="popup__error popup__profession-error"></span>

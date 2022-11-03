@@ -6,6 +6,11 @@ import Footer from './Footer';
 import api from '../utils/Api';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import EditAvatarPopup from './EditAvatarPopup';
+import EditProfilePopup from './EditProfilePopup';
+import AddPlacePopup from './AddPlacePopup';
+import ImagePopup from './ImagePopup';
+import PopupWithForm from './PopupWithForm';
+import RemoveCardPopup from './RemoveCardPopup';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false)
@@ -17,6 +22,8 @@ function App() {
   const [currentUser, setCurrentUser] = useState({})
   const [cards, setCards] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+
+  const isOpen = isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || isImagePopupOpen || isRemoveCardPopupOpen
 
   function getUserData() {
     return api.getUserData()
@@ -30,23 +37,22 @@ function App() {
 
   function handleCardLike(card) {
     const isLiked = card.likes.some(i => i._id === currentUser._id)
-    isLiked 
+    isLiked  
     ? api.deleteLike(card)
-      .then(() => 
-        card => setCards(state => state.map(c => c._id === card._id ? card : c)))
-      .catch(err => console.log(err))
+        .then(card => setCards(state => state.map(c => c._id === card._id ? card : c)))
+        .catch(err => console.log(err))
     : api.like(card._id)
-      .then(() => 
-        card => setCards(state => state.map(c => c._id === card._id ? card : c)))
-      .catch(err => console.log(err))
+        .then(card => setCards(state => state.map(c => c._id === card._id ? card : c)))
+        .catch(err => console.log(err))
   }
 
   function handleCardDelete(cardId) {
     api.deleteCard(cardId)
-      .then(() => {
-        setCards(cards => cards.filter(card => card._id !== cardId))
-        setIsLoading(true)
-      }).catch(err => console.log(err))
+      .then(() => 
+        setCards(cards => cards.filter(card => card._id !== cardId)),
+        setIsLoading(true),
+        closeAllPopups()
+      ).catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
@@ -56,10 +62,10 @@ function App() {
 
   function handleAddCard(newData) {
     api.newCard(newData)
-      .then(() => {
-        card => setCards([card, ...cards])
-        setIsLoading(true)
-      }).catch(err => console.log(err))
+      .then(card => setCards([card, ...cards]),
+        setIsLoading(true),
+        closeAllPopups()
+      ).catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
@@ -75,11 +81,17 @@ function App() {
     setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen)
   }
 
+  function handleRemoveCardClick(card) {
+    setSelectedCard(card)
+    setIsRemoveCardPopupOpen(!isRemoveCardPopupOpen)
+  }
+
   function closeAllPopups() {
     setIsAddPlacePopupOpen(false)
     setIsEditProfilePopupOpen(false)
     setIsEditAvatarPopupOpen(false)
     setIsImagePopupOpen(false)
+    setIsRemoveCardPopupOpen(false)
     setSelectedCard({})
   }
 
@@ -90,55 +102,63 @@ function App() {
 
   function handleUpdateUser(newData){
     api.sendData(newData)
-      .then(() => {
-        data => setCurrentUser({...currentUser, ...data})
-        setIsLoading(true)
-      }).catch(err => console.log(err))
+      .then(data => setCurrentUser({...currentUser, ...data}),
+        setIsLoading(true),
+        closeAllPopups()
+      ).catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
   function handleUpdateAvatar(newData) {
     api.editAvatar(newData)
-      .then(() => {
-        data => setCurrentUser({...currentUser, ...data})
-        setIsLoading(true)
-      }).catch(err => console.log(err))
+      .then(data => setCurrentUser({...currentUser, ...data}),
+        setIsLoading(true),
+        closeAllPopups()
+      ).catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
   useEffect(() => {
     getUserData()
-      .then(() => 
-        userData => setCurrentUser({ ...currentUser, ...userData }))
+      .then(userData => setCurrentUser({ ...currentUser, ...userData }))
       .catch(err => console.log(err))
   }, [])
 
   useEffect(() => {
-    cardsProps.onGetCardsData()
+    getCardsData()
       .then(cardsData => 
         cardsData.forEach(item => 
-          cardsProps.onSetNewCard(item)))
+          setNewCard(item)))
   }, [])
+
+  useEffect(() => {
+    function closeByEsc(e) {
+      if (e.key === 'Escape') {
+        closeAllPopups()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', closeByEsc)
+      return () => {
+        document.removeEventListener('keydown', closeByEsc)
+      }
+    }
+  }, [isOpen])
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="content">
         <Header />
         <Main 
-          props={
-            handleEditAvatarClick
-          } 
-          openState={{
-            isAddPlacePopupOpen, 
-            isEditAvatarPopupOpen, 
-            isEditProfilePopupOpen, 
-            isImagePopupOpen 
-          }}
-          card={selectedCard} 
-          cardsProps={{
-            handleCardLike,
-            handleCardDelete
-          }}
+          props={{
+            handleEditAvatarClick,
+            handleEditProfileClick,
+            handleAddPlaceClick,
+            handleCardClick,
+            handleRemoveCardClick,
+            handleCardLike
+          }} 
           cards={cards}
         />
 
@@ -146,30 +166,37 @@ function App() {
         <EditAvatarPopup 
           isOpen={isEditAvatarPopupOpen} 
           isLoading={isLoading} 
-          onUpdateAvatar={props.onSubmitAvatar} 
-          onClose={props.onClose} 
+          onUpdateAvatar={handleUpdateAvatar} 
+          onClose={closeAllPopups} 
         /> 
         <EditProfilePopup 
-          isOpen={openState.isEditProfilePopupOpen}
+          isOpen={isEditProfilePopupOpen}
           isLoading={isLoading} 
-          onUpdateUser={props.onSubmit} 
-          onClose={props.onClose} 
+          onUpdateUser={handleUpdateUser} 
+          onClose={closeAllPopups} 
         />
         <AddPlacePopup 
-          isOpen={openState.isAddPlacePopupOpen} 
+          isOpen={isAddPlacePopupOpen} 
           isLoading={isLoading} 
-          onSubmit={onAddCard} 
-          onClose={props.onClose} 
+          onSubmit={handleAddCard} 
+          onClose={closeAllPopups} 
         />
         <ImagePopup 
-          isOpen={openState.isImagePopupOpen} 
+          isOpen={isImagePopupOpen} 
           isLoading={isLoading} 
-          onClose={props.onClose} 
-          card={card}
+          onClose={closeAllPopups} 
+          card={selectedCard}
         />
         <PopupWithForm 
           name='card-remove-form' 
           title='Вы уверены?' 
+        />
+        <RemoveCardPopup
+          isOpen={isRemoveCardPopupOpen}
+          isLoading={isLoading}
+          onClose={closeAllPopups}
+          card={selectedCard}
+          onSubmit={handleCardDelete}
         />
         <Footer />
       </div>

@@ -1,28 +1,41 @@
-import React, {useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import PopupWithForm from './PopupWithForm';
 
-const AddPlacePopup = ({isOpen, onClose, onSubmit}) => {
-  const cardName = useRef()
-  const cardLink = useRef()
+const AddPlacePopup = ({isOpen, onClose, onSubmit, isLoading}) => {
+  const [name, setName] = useState('')
+  const [link, setLink] = useState('')
 
-  function handleClose() {
-    onClose()
+  function handleName(e) {
+    setName(e.target.value)
+  }
+
+  function handleLink(e) {
+    setLink(e.target.value)
   }
 
   function handleSubmit(e) {
     e.preventDefault()
 
     onSubmit({
-      name: cardName.current.value,
-      link: cardLink.current.value
+      name,
+      link
     })
-    cardName.current.value = ''
-    cardLink.current.value = ''
-    handleClose()
   }
 
+  useEffect(() => {
+    setName('')
+    setLink('')
+  }, [isOpen])
+
   return (
-    <PopupWithForm isOpen={isOpen} onSubmit={handleSubmit} onClose={handleClose} name='add-place-form' title='Новое место' buttonText='Сохранить'>
+    <PopupWithForm 
+      isOpen={isOpen}
+      onSubmit={handleSubmit} 
+      onClose={onClose} 
+      name='add-place-form' 
+      title='Новое место' 
+      buttonText={isLoading ? 'Сохранение...' : 'Сохранить'}
+    >
       <div className="popup__divide-container">
         <input 
           name="name" 
@@ -33,7 +46,8 @@ const AddPlacePopup = ({isOpen, onClose, onSubmit}) => {
           required 
           minLength="2" 
           maxLength="30" 
-          ref={cardName}
+          value={name}
+          onChange={handleName}
         />
         <span className="popup__error popup__title-error"></span>
       </div>
@@ -45,7 +59,8 @@ const AddPlacePopup = ({isOpen, onClose, onSubmit}) => {
           placeholder="Ссылка на картинку" 
           id="popup__link" 
           required 
-          ref={cardLink}
+          value={link}
+          onChange={handleLink}
         />
         <span className="popup__error popup__link-error"></span>
       </div>

@@ -19,7 +19,7 @@ function Card({card, onImageClick, onCardLike, onCardDelete}) {
   }
 
   function handleCardDelete() {
-    onCardDelete(card._id)
+    onCardDelete(card)
   }
 
   return (
