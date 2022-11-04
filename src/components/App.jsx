@@ -31,7 +31,7 @@ function App() {
 
   function getCardsData() {
     return api.getCardsData()
-      .then(res => res)
+      .then(cardsData => cardsData)
       .catch(err => console.log(err))
   }
 
@@ -47,25 +47,20 @@ function App() {
   }
 
   function handleCardDelete(cardId) {
+    setIsLoading(true)
     api.deleteCard(cardId)
-      .then(() => 
-        setCards(cards => cards.filter(card => card._id !== cardId)),
-        setIsLoading(true),
-        closeAllPopups()
-      ).catch(err => console.log(err))
+      .then(setCards(cards => cards.filter(card => card._id !== cardId)))
+      .then(() => closeAllPopups())
+      .catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
-  function setNewCard(card) {
-    setCards(cards => [...cards, card])
-  }
-
   function handleAddCard(newData) {
+    setIsLoading(true)
     api.newCard(newData)
-      .then(card => setCards([card, ...cards]),
-        setIsLoading(true),
-        closeAllPopups()
-      ).catch(err => console.log(err))
+      .then(card => setCards([card, ...cards]))
+      .then(() => closeAllPopups())
+      .catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
@@ -100,21 +95,21 @@ function App() {
     setIsImagePopupOpen(true)
   }
 
-  function handleUpdateUser(newData){
+  function handleUpdateUser(newData) {
+    setIsLoading(true)
     api.sendData(newData)
-      .then(data => setCurrentUser({...currentUser, ...data}),
-        setIsLoading(true),
-        closeAllPopups()
-      ).catch(err => console.log(err))
+      .then(data => setCurrentUser({...currentUser, ...data}))
+      .then(() => closeAllPopups())
+      .catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
   function handleUpdateAvatar(newData) {
+    setIsLoading(true)
     api.editAvatar(newData)
-      .then(data => setCurrentUser({...currentUser, ...data}),
-        setIsLoading(true),
-        closeAllPopups()
-      ).catch(err => console.log(err))
+      .then(data => setCurrentUser({...currentUser, ...data}))
+      .then(() => closeAllPopups())
+      .catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
 
@@ -126,9 +121,7 @@ function App() {
 
   useEffect(() => {
     getCardsData()
-      .then(cardsData => 
-        cardsData.forEach(item => 
-          setNewCard(item)))
+      .then(cardsData => setCards(cardsData))
   }, [])
 
   useEffect(() => {
