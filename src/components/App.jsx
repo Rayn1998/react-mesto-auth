@@ -32,7 +32,6 @@ function App() {
   function getCardsData() {
     return api.getCardsData()
       .then(cardsData => cardsData)
-      .catch(err => console.log(err))
   }
 
   function handleCardLike(card) {
@@ -49,8 +48,10 @@ function App() {
   function handleCardDelete(cardId) {
     setIsLoading(true)
     api.deleteCard(cardId)
-      .then(setCards(cards => cards.filter(card => card._id !== cardId)))
-      .then(() => closeAllPopups())
+      .then(() => {
+        setCards(cards => cards.filter(card => card._id !== cardId))
+        closeAllPopups()
+      })
       .catch(err => console.log(err))
       .finally(() => setIsLoading(false))
   }
@@ -122,6 +123,7 @@ function App() {
   useEffect(() => {
     getCardsData()
       .then(cardsData => setCards(cardsData))
+      .catch(err => console.log(err))
   }, [])
 
   useEffect(() => {
