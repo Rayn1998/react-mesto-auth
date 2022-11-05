@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-const Login = () => {
+const Register = () => {
   const [formValues, setFormValues] = useState({email: '', password: ''})
 
   function handleChangeValues(e) {
@@ -13,7 +13,7 @@ const Login = () => {
   return (
     <>
       <form className='auth-form'>
-        <h2 className='auth-form__title'>Вход</h2>
+        <h2 className='auth-form__title'>Регистрация</h2>
         <div className='auth-form__fields-wrapper'>
           <input 
             className='auth-form__input'
@@ -35,10 +35,11 @@ const Login = () => {
             placeholder='Password'
           />
         </div>
-        <button className='auth-form__btn-submit'>Войти</button>
+        <button className='auth-form__btn-submit'>Зарегистрироваться</button>
       </form>      
+        <p className='auth-form__registered'>Уже зарегистрированы? <a href='#' className='auth-form__log-in'>Войти</a></p>
     </>
   );
 };
 
-export default Login;
+export default Register;
