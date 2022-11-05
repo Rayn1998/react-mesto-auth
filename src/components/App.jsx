@@ -191,11 +191,11 @@ function App() {
             cards={cards}
             component={Main}
           />
-          <Route path='/sign-up'>
-            <Register />
-          </Route>
           <Route path='/sign-in'>
             <Login />
+          </Route>
+          <Route path='/sign-up'>
+            <Register />
           </Route>
           <Route exact path='/'>
             {loggedIn ? <Redirect to='/main' /> : <Redirect to='/sign-in' />}
