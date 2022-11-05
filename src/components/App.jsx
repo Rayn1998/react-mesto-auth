@@ -12,6 +12,8 @@ import ImagePopup from './ImagePopup';
 import PopupWithForm from './PopupWithForm';
 import RemoveCardPopup from './RemoveCardPopup';
 
+import Login from './Login';
+
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false)
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false)
@@ -145,7 +147,7 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="content">
         <Header />
-        <Main 
+        {/*<Main 
           props={{
             handleEditAvatarClick,
             handleEditProfileClick,
@@ -155,7 +157,8 @@ function App() {
             handleCardLike
           }} 
           cards={cards}
-        />
+        /> */}
+        <Login />
 
         {/* POPUPS */}
         <EditAvatarPopup 

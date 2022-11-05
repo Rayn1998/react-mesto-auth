@@ -43,6 +43,15 @@
 @import url('../blocks/footer/footer.css');
 @import url('../blocks/footer/__text/footer__text.css');
 
+/* LOGIN */
+@import url("../blocks/auth-form/auth-from.css");
+@import url("../blocks/auth-form/__title/auth-form__title.css");
+@import url("../blocks/auth-form/__fields-wrapper/auth-form__fields-wrapper.css");
+@import url("../blocks/auth-form/__input/auth-form__input.css");
+@import url("../blocks/auth-form/__btn-submit/auth-form__btn-submit.css");
+@import url("../blocks/auth-form/__log-in/auth-form__log-in.css");
+@import url("../blocks/auth-form/__registered/auth-form__registered.css");
+
 /* POPUP */
 @import url('../blocks/popup/popup.css');
 @import url('../blocks/popup/__body/popup__body.css');
