@@ -1,7 +1,7 @@
 export const BASE_URL = 'https://auth.nomoreparties.co/';
 
-export const register = (password, email) => {
-    return fetch(`${BASE_URL}/signup`, {
+export const register = async (password, email) => {
+    const res = await fetch(`${BASE_URL}/signup`, {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
@@ -11,21 +11,12 @@ export const register = (password, email) => {
             "email": `${email}`
         })
     })
-    .then(response => {
-        try {
-            if (response.status === 200) {
-                return response.json()
-            }
-        } catch(e) {
-            return e
-        }
-    })
-    .then(res => res)
-    .catch(err => console.log(err))
+
+    return checkResponse(res)
 }
 
-export const authorize = (password, email) => {
-    return fetch(`${BASE_URL}/signin`, {
+export const authenticate = async (password, email) => {
+    const res = await fetch(`${BASE_URL}/signin`, {
         method: 'POST',
         headers: {
             'content-type': 'application/json'
@@ -35,36 +26,20 @@ export const authorize = (password, email) => {
             'email': `${email}`
         }
     })
-    .then(response => {
-        try {
-            if (response.status === 200) {
-                return response.json()
-            }
-        } catch(e) {
-            return e
-        }
-    })
-    .then(res => res)
-    .catch(err => console.log(err))
+
+    return checkResponse(res)
 }
 
-export const checkToken = jwt => {
-    return fetch(`${BASE_URL}`, {
+export const checkToken = async jwt => {
+    const res = await fetch(`${BASE_URL}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${jwt}`
         }
     })
-    .then(response => {
-        try {
-            if (response.status === 200) {
-                return response.json()
-            }
-        } catch(e) {
-            return e
-        }
-    })
-    .then(res => res)
-    .catch(err => console.log(err))
+
+    return checkResponse(res)
 }
+
+const checkResponse = res => res.ok ? res.json() : Promise.reject(`Error: ${res.statusText}`)

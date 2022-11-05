@@ -1,11 +1,9 @@
 import React from "react";
-import { Link, useLocation, useHistory, } from "react-router-dom";
-import { withRouter } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../images/logo.svg";
 
-function Header() {
+function Header({loggedIn}) {
   const location = useLocation()
-  const history = useHistory()
 
   return (
     <header className="header">
@@ -21,11 +19,15 @@ function Header() {
           Регистрация
         </Link>
         }
-        <li className="header__menu-item">Email</li>
-        <li className="header__menu-item">Выйти</li>
+        {loggedIn && 
+          <>
+            <li className="header__menu-item">Email</li>
+            <li className="header__menu-item">Выйти</li>
+          </>
+        }
       </nav>
     </header>
   );
 }
 
-export default withRouter(Header);
+export default Header;

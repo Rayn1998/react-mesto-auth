@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Switch, Route, Redirect } from 'react-router-dom';
 import "../pages/index.css";
 import Header from "./Header";
@@ -18,6 +18,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Login from "./Login";
 import Register from "./Register";
 import InfoToolTip from "./InfoToolTip";
+import PageNotFound from "./PageNotFound";
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -42,33 +43,89 @@ function App() {
     isRemoveCardPopupOpen ||
     isInfoToolTipPopup;
 
-  function getUserData() {
-    return api.getUserData();
+  const setUserState = useCallback((data) => {
+    setIsLoggedIn(true)
+    localStorage.setItem('jwt', data.jwt)
+    setCurrentUser(data.user)
+  }, [])
+
+  const checkToken = useCallback(async () => {
+    try {
+      setIsLoading(true)
+
+      const jwt = localStorage.getItem('jwt')
+      if (!jwt) {
+        throw new Error('No token found')
+      }
+
+      const user = await auth.checkToken()
+      if (!user) {
+        throw new Error('Invalid user')
+      }
+
+      setIsLoggedIn(true)
+    } catch {}
+    finally {
+      setIsLoading(false)
+    }
+
+  }, [])
+
+  const authenticate = useCallback(async (password, email) => {
+    try {
+      const data = await auth.authenticate(password, email)
+      if (!data) {
+        throw new Error('Invalid credentials')
+      } 
+      if (data.jwt) {
+        setUserState(data)
+      }
+    } catch {}
+  }, [])
+
+  const register = useCallback(async (password, email) => {
+    try {
+      const data = await auth.register(password, email)
+      if (!data) {
+        throw new Error('Failed to register')
+      }
+      if(data.jwt) {
+        setUserState(data)
+      }
+    } catch {}
+  }, [])
+
+  // Функции запросов на сервер
+  async function getUserData() {
+    const userData = await api.getUserData()
+    return userData
   }
 
-  function getCardsData() {
-    return api.getCardsData().then((cardsData) => cardsData);
+  async function getCardsData() {
+    const cards = await api.getCardsData()
+    return cards
   }
 
+  // Функции для работы с карточками
   function handleCardLike(card) {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
     isLiked
       ? api
-          .deleteLike(card)
-          .then((card) =>
-            setCards((state) =>
-              state.map((c) => (c._id === card._id ? card : c))
-            )
+        .deleteLike(card)
+        .then((card) =>
+          setCards((state) =>
+            state.map((c) => (c._id === card._id ? card : c))
           )
-          .catch((err) => console.log(err))
+        )
+        .catch((err) => console.log(err))
       : api
-          .like(card._id)
-          .then((card) =>
-            setCards((state) =>
-              state.map((c) => (c._id === card._id ? card : c))
-            )
+        .like(card._id)
+        .then((card) =>
+          setCards((state) =>
+            state.map((c) => (c._id === card._id ? card : c))
           )
-          .catch((err) => console.log(err));
+        )
+        .catch((err) => console.log(err));
   }
 
   function handleCardDelete(cardId) {
@@ -91,6 +148,12 @@ function App() {
       .then(() => closeAllPopups())
       .catch((err) => console.log(err))
       .finally(() => setIsLoading(false));
+  }
+
+  // Функции попапов
+  function handleCardClick(e) {
+    setSelectedCard(e.target);
+    setIsImagePopupOpen(true);
   }
 
   function handleEditProfileClick() {
@@ -120,11 +183,7 @@ function App() {
     setSelectedCard({});
   }
 
-  function handleCardClick(e) {
-    setSelectedCard(e.target);
-    setIsImagePopupOpen(true);
-  }
-
+  // Функции сабмитов
   function handleUpdateUser(newData) {
     setIsLoading(true);
     api
@@ -145,13 +204,12 @@ function App() {
       .finally(() => setIsLoading(false));
   }
 
+  // USEEFFECTS
   useEffect(() => {
     getUserData()
       .then((userData) => setCurrentUser({ ...currentUser, ...userData }))
       .catch((err) => console.log(err));
-  }, []);
 
-  useEffect(() => {
     getCardsData()
       .then((cardsData) => setCards(cardsData))
       .catch((err) => console.log(err));
@@ -175,7 +233,7 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="content">
-        <Header />
+        <Header loggedIn={loggedIn} />
         <Switch>
           <ProtectedRoute
             path='/main'
@@ -199,6 +257,9 @@ function App() {
           </Route>
           <Route exact path='/'>
             {loggedIn ? <Redirect to='/main' /> : <Redirect to='/sign-in' />}
+          </Route>
+          <Route path='*'>
+            <PageNotFound />
           </Route>
         </Switch>
         <Footer />
