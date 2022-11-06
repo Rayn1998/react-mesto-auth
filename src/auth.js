@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://auth.nomoreparties.co/';
+export const BASE_URL = 'https://auth.nomoreparties.co';
 
 export const register = async (password, email) => {
     const res = await fetch(`${BASE_URL}/signup`, {
@@ -19,23 +19,23 @@ export const authenticate = async (password, email) => {
     const res = await fetch(`${BASE_URL}/signin`, {
         method: 'POST',
         headers: {
-            'content-type': 'application/json'
+            'Content-Type': 'application/json'
         },
-        body: {
-            'password': `${password}`,
-            'email': `${email}`
-        }
+        body: JSON.stringify({
+            "password": `${password}`,
+            "email": `${email}`
+        })
     })
 
     return checkResponse(res)
 }
 
 export const checkToken = async jwt => {
-    const res = await fetch(`${BASE_URL}`, {
+    const res = await fetch(`${BASE_URL}/users/me`, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${jwt}`
         }
     })
 

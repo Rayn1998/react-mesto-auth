@@ -1,7 +1,8 @@
 import React from "react";
-import registerOk from '../images/register-ok.png';
+import registerOK from '../images/register-ok.png';
+import registerBAD from '../images/register-bad.png';
 
-const InfoToolTip = ({ isOpen, onClose }) => {
+const InfoToolTip = ({ isOpen, onClose, registerOk }) => {
   return (
     <div className={`popup popup_type_info-tool-tip ${isOpen && "popup_opened"}`}>
       <div className="popup__body">
@@ -13,8 +14,8 @@ const InfoToolTip = ({ isOpen, onClose }) => {
             onClick={onClose}
           />
           <div className="popup__auth-wrapper">
-            <img className="popup__auth-reg-img" src={registerOk} alt='Изображение после регистрации' />
-            <p className='popup__auth-reg-text'>Вы успешно зарегистрировались!</p>
+            <img className="popup__auth-reg-img" src={registerOk ? registerOK : registerBAD} alt='Изображение после регистрации' />
+            <p className='popup__auth-reg-text'>{registerOk ? 'Вы успешно зарегистрировались!' : 'Что-то пошло не так! Попробуйте ещё раз.'}</p>
           </div>
         </div>
       </div>

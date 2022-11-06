@@ -1,18 +1,28 @@
 import React, {useState} from 'react';
+import {Redirect} from 'react-router-dom';
 
-const Login = () => {
+const Login = ({loggedIn, onSubmit}) => {
   const [formValues, setFormValues] = useState({email: '', password: ''})
 
-  function handleChangeValues(e) {
+  const handleChangeValues = (e) => {
     setFormValues(oldValues => ({
       ...oldValues, 
       [e.target.name]: e.target.value 
     }))
   }
 
+  function handleSubmit(e) {
+    e.preventDefault()
+    onSubmit(formValues.password, formValues.email)
+  }
+
+  if (loggedIn) {
+  return <Redirect to='/' />
+  }
+
   return (
     <>
-      <form className='auth-form'>
+      <form className='auth-form' onSubmit={handleSubmit}>
         <h2 className='auth-form__title'>Вход</h2>
         <div className='auth-form__fields-wrapper'>
           <input 
@@ -24,6 +34,7 @@ const Login = () => {
             required
             minLength='2'
             placeholder='Email'
+            autoComplete='on'
           />
           <input 
             className='auth-form__input'
@@ -33,9 +44,15 @@ const Login = () => {
             onChange={handleChangeValues}
             required
             placeholder='Password'
+            autoComplete='on'
           />
         </div>
-        <button className='auth-form__btn-submit'>Войти</button>
+        <button 
+          type='submit'
+          className='auth-form__btn-submit'
+        >
+          Войти
+        </button>
       </form>      
     </>
   );

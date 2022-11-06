@@ -18,6 +18,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Login from "./Login";
 import Register from "./Register";
 import InfoToolTip from "./InfoToolTip";
+import Loading from "./Loading";
 import PageNotFound from "./PageNotFound";
 
 function App() {
@@ -27,11 +28,13 @@ function App() {
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isRemoveCardPopupOpen, setIsRemoveCardPopupOpen] = useState(false);
   const [isInfoToolTipPopup, setIsInfoToolTipPopup] = useState(false);
+  const [isLoadingPopupOpen, setIsLoadingPopupOpen] = useState(false);
 
   const [selectedCard, setSelectedCard] = useState({});
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegisterOk, setIsRegisterOk] = useState(false)
 
   const [loggedIn, setIsLoggedIn] = useState(false);
 
@@ -43,57 +46,79 @@ function App() {
     isRemoveCardPopupOpen ||
     isInfoToolTipPopup;
 
-  const setUserState = useCallback((data) => {
-    setIsLoggedIn(true)
-    localStorage.setItem('jwt', data.jwt)
-    setCurrentUser(data.user)
+  const setUserState = useCallback((data, email) => {
+    setIsLoadingPopupOpen(true)
+    localStorage.setItem('jwt', data)
+    getUserData()
+      .then((userData) => setCurrentUser({ ...currentUser, ...userData, email }))
+      .catch((err) => console.log(err));
+
+    getCardsData()
+      .then((cardsData) => setCards(cardsData))
+      .catch((err) => console.log(err));
+    setIsLoadingPopupOpen(false)
   }, [])
 
   const checkToken = useCallback(async () => {
     try {
-      setIsLoading(true)
+      setIsLoadingPopupOpen(true)
 
       const jwt = localStorage.getItem('jwt')
       if (!jwt) {
         throw new Error('No token found')
       }
 
-      const user = await auth.checkToken()
-      if (!user) {
-        throw new Error('Invalid user')
-      }
+      const user = await auth.checkToken(jwt)
+      const email = localStorage.getItem('email')
+      setUserState(user, email)
 
       setIsLoggedIn(true)
-    } catch {}
-    finally {
-      setIsLoading(false)
+    } catch { 
+      throw new Error('Invalid user')
     }
-
+    finally {
+      setIsLoadingPopupOpen(false)
+    }
   }, [])
 
   const authenticate = useCallback(async (password, email) => {
+    localStorage.setItem('email', email)
+    setIsLoadingPopupOpen(true)
     try {
       const data = await auth.authenticate(password, email)
-      if (!data) {
-        throw new Error('Invalid credentials')
-      } 
-      if (data.jwt) {
-        setUserState(data)
+      if (data.token) {
+        setUserState(data.token, email)
+        setIsLoggedIn(true)
       }
-    } catch {}
+    } catch {
+      setIsInfoToolTipPopup(true)
+    }
+    finally { setIsLoadingPopupOpen(false) }
   }, [])
 
   const register = useCallback(async (password, email) => {
+    setIsLoadingPopupOpen(true)
     try {
       const data = await auth.register(password, email)
-      if (!data) {
-        throw new Error('Failed to register')
+      if (data) {
+        setIsRegisterOk(true)
+        setIsInfoToolTipPopup(true)
+        authenticate(data)
       }
-      if(data.jwt) {
-        setUserState(data)
-      }
-    } catch {}
-  }, [])
+    } catch {
+      setIsLoadingPopupOpen(false)
+      setIsInfoToolTipPopup(true)
+      throw new Error('Failed to register')
+    }
+    finally { setIsRegisterOk(false) }
+  }, [authenticate])
+
+  const logOut = useCallback(() => {
+    localStorage.removeItem('jwt')
+    setIsLoggedIn(false)
+    setCurrentUser({})
+    setIsRegisterOk(false)
+  })
 
   // Функции запросов на сервер
   async function getUserData() {
@@ -181,6 +206,7 @@ function App() {
     setIsRemoveCardPopupOpen(false);
     setIsInfoToolTipPopup(false);
     setSelectedCard({});
+    setIsLoadingPopupOpen(false)
   }
 
   // Функции сабмитов
@@ -206,14 +232,8 @@ function App() {
 
   // USEEFFECTS
   useEffect(() => {
-    getUserData()
-      .then((userData) => setCurrentUser({ ...currentUser, ...userData }))
-      .catch((err) => console.log(err));
-
-    getCardsData()
-      .then((cardsData) => setCards(cardsData))
-      .catch((err) => console.log(err));
-  }, []);
+    checkToken()
+  }, [])
 
   useEffect(() => {
     function closeByEsc(e) {
@@ -233,7 +253,7 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="content">
-        <Header loggedIn={loggedIn} />
+        <Header loggedIn={loggedIn} onLogOut={logOut} />
         <Switch>
           <ProtectedRoute
             path='/main'
@@ -250,10 +270,16 @@ function App() {
             component={Main}
           />
           <Route path='/sign-in'>
-            <Login />
+            <Login
+              loggedIn={loggedIn}
+              onSubmit={authenticate}
+            />
           </Route>
           <Route path='/sign-up'>
-            <Register />
+            <Register
+              onSubmit={register}
+              registerOk={isRegisterOk}
+            />
           </Route>
           <Route exact path='/'>
             {loggedIn ? <Redirect to='/main' /> : <Redirect to='/sign-in' />}
@@ -297,7 +323,8 @@ function App() {
           card={selectedCard}
           onSubmit={handleCardDelete}
         />
-        <InfoToolTip isOpen={isInfoToolTipPopup} onClose={closeAllPopups} />
+        <InfoToolTip isOpen={isInfoToolTipPopup} onClose={closeAllPopups} registerOk={isRegisterOk} />
+        <Loading isOpen={isLoadingPopupOpen} onClose={closeAllPopups} />
       </div>
     </CurrentUserContext.Provider>
   );

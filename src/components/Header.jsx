@@ -1,9 +1,11 @@
-import React from "react";
+import React, {useContext} from "react";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../images/logo.svg";
 
-function Header({loggedIn}) {
+function Header({loggedIn, onLogOut}) {
   const location = useLocation()
+  const user = useContext(CurrentUserContext)
 
   return (
     <header className="header">
@@ -21,8 +23,8 @@ function Header({loggedIn}) {
         }
         {loggedIn && 
           <>
-            <li className="header__menu-item">Email</li>
-            <li className="header__menu-item">Выйти</li>
+            <li className="header__menu-item">{user.email}</li>
+            <li className="header__menu-item" style={{cursor: 'pointer'}} onClick={onLogOut}>Выйти</li>
           </>
         }
       </nav>

@@ -1,19 +1,28 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 
-const Register = () => {
+const Register = ({onSubmit, registerOk}) => {
   const [formValues, setFormValues] = useState({email: '', password: ''})
 
-  function handleChangeValues(e) {
+  const handleChangeValues = (e) => {
     setFormValues(oldValues => ({
       ...oldValues, 
       [e.target.name]: e.target.value 
     }))
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSubmit(formValues.password, formValues.email)
+  }
+
+  if (registerOk) {
+    return <Redirect to='/' />
+  }
+
   return (
     <>
-      <form className='auth-form'>
+      <form className='auth-form' onSubmit={handleSubmit}>
         <h2 className='auth-form__title'>Регистрация</h2>
         <div className='auth-form__fields-wrapper'>
           <input 
@@ -36,7 +45,12 @@ const Register = () => {
             placeholder='Password'
           />
         </div>
-        <button className='auth-form__btn-submit'>Зарегистрироваться</button>
+        <button 
+          type='submit'
+          className='auth-form__btn-submit'
+        >
+          Зарегистрироваться
+        </button>
       </form>      
         <p className='auth-form__registered'>Уже зарегистрированы? <Link to='/sign-in' className='auth-form__log-in'>Войти</Link></p>
     </>
