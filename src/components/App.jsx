@@ -64,13 +64,9 @@ function App() {
       setIsLoadingPopupOpen(true)
 
       const jwt = localStorage.getItem('jwt')
-      if (!jwt) {
-        throw new Error('No token found')
-      }
-
       const user = await auth.checkToken(jwt)
-      const email = localStorage.getItem('email')
-      setUserState(user, email)
+      const email = user.data.email
+      setUserState(jwt, email)
 
       setIsLoggedIn(true)
     } catch { 
@@ -101,17 +97,19 @@ function App() {
     try {
       const data = await auth.register(password, email)
       if (data) {
+        const auth = await authenticate(password, data.data.email)
         setIsRegisterOk(true)
+        setIsLoadingPopupOpen(false)
         setIsInfoToolTipPopup(true)
-        authenticate(data)
       }
     } catch {
       setIsLoadingPopupOpen(false)
+      setIsRegisterOk(false)
       setIsInfoToolTipPopup(true)
       throw new Error('Failed to register')
+    } finally {
     }
-    finally { setIsRegisterOk(false) }
-  }, [authenticate])
+  }, [])
 
   const logOut = useCallback(() => {
     localStorage.removeItem('jwt')
