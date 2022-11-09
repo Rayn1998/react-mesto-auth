@@ -97,10 +97,10 @@ function App() {
     try {
       const data = await auth.register(password, email)
       if (data) {
-        const auth = await authenticate(password, data.data.email)
         setIsRegisterOk(true)
         setIsLoadingPopupOpen(false)
         setIsInfoToolTipPopup(true)
+        authenticate(password, data.data.email)
       }
     } catch {
       setIsLoadingPopupOpen(false)

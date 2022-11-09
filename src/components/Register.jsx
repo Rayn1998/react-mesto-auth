@@ -16,9 +16,9 @@ const Register = ({onSubmit, registerOk}) => {
     onSubmit(formValues.password, formValues.email)
   }
 
-  // if (registerOk) {
-  //   return <Redirect to='/' />
-  // }
+  if (registerOk) {
+    return <Redirect to='/' />
+  }
 
   return (
     <>
