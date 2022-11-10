@@ -82,6 +82,7 @@ function App() {
     setIsLoadingPopupOpen(true)
     try {
       const data = await auth.authenticate(password, email)
+      console.log(data)
       if (data.token) {
         setUserState(data.token, email)
         setIsLoggedIn(true)
@@ -100,14 +101,11 @@ function App() {
         setIsRegisterOk(true)
         setIsLoadingPopupOpen(false)
         setIsInfoToolTipPopup(true)
-        authenticate(password, data.data.email)
       }
     } catch {
       setIsLoadingPopupOpen(false)
-      setIsRegisterOk(false)
       setIsInfoToolTipPopup(true)
       throw new Error('Failed to register')
-    } finally {
     }
   }, [])
 
@@ -130,24 +128,22 @@ function App() {
   }
 
   // Функции для работы с карточками
+  function likeCard(data) {
+      setCards((state) =>
+        state.map((c) => (c._id === data._id ? data : c))
+      )
+  }
+
   function handleCardLike(card) {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
     isLiked
       ? api
         .deleteLike(card)
-        .then((card) =>
-          setCards((state) =>
-            state.map((c) => (c._id === card._id ? card : c))
-          )
-        )
+        .then(likeCard)
         .catch((err) => console.log(err))
       : api
         .like(card._id)
-        .then((card) =>
-          setCards((state) =>
-            state.map((c) => (c._id === card._id ? card : c))
-          )
-        )
+        .then(likeCard)
         .catch((err) => console.log(err));
   }
 
@@ -202,9 +198,15 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsImagePopupOpen(false);
     setIsRemoveCardPopupOpen(false);
-    setIsInfoToolTipPopup(false);
     setSelectedCard({});
     setIsLoadingPopupOpen(false)
+  }
+
+  function closeInfo() {
+    setIsInfoToolTipPopup(false);
+    setTimeout(() => {
+      setIsRegisterOk(false)
+    }, 1000)
   }
 
   // Функции сабмитов
@@ -321,7 +323,7 @@ function App() {
           card={selectedCard}
           onSubmit={handleCardDelete}
         />
-        <InfoToolTip isOpen={isInfoToolTipPopup} onClose={closeAllPopups} registerOk={isRegisterOk} />
+        <InfoToolTip isOpen={isInfoToolTipPopup} onClose={closeInfo} registerOk={isRegisterOk} />
         <Loading isOpen={isLoadingPopupOpen} onClose={closeAllPopups} />
       </div>
     </CurrentUserContext.Provider>
